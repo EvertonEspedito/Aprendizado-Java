@@ -14,7 +14,7 @@ public class ExemploImagem extends Application {
     @Override
     public void start(Stage palco) {
 
-        String caminhoImagem = "imagens/kratos.jpg";
+        String caminhoImagem = "file:////home/everton/Documentos/PROJETOS/Aprendizado-Java/javafx/imagens/kratos.jpg";
 
         Image imagem = new Image(caminhoImagem);
         ImageView imagemView = new ImageView(imagem);
