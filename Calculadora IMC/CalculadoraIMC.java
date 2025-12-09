@@ -24,6 +24,7 @@ public class CalculadoraIMC extends Application {
 
     	//Resultados dos Dados IMC
     	Label etiquetaResultado = new Label();
+        Label etiquetaTipoResultado = new Label();
 
     	//Botão e função para envio de dados
     	Button botaoCalc = new Button("Calcular IMC");
@@ -34,13 +35,31 @@ public class CalculadoraIMC extends Application {
 
     		  double imc = peso/(altura*altura);
     		  etiquetaResultado.setText(String.format("Seu IMC é: %.2f",imc));
+
+              if (imc < 17) {
+                  etiquetaTipoResultado.setText(String.format("Você esta muito abaixo do peso!"));
+              }else if (imc >= 17 && imc <= 18.49) {
+                  etiquetaTipoResultado.setText(String.format("Você esta abaixo do peso!"));
+              }else if (imc >= 18.5 && imc <= 24.99) {
+                  etiquetaTipoResultado.setText(String.format("Você esta no peso normal!"));
+              }else if (imc >= 25 && imc <= 29.99) {
+                  etiquetaTipoResultado.setText(String.format("Você esta acima do peso!"));
+              }else if (imc >= 30 && imc <= 34.99) {
+                  etiquetaTipoResultado.setText(String.format("Você esta na obesidade 1!"));
+              }else if (imc >= 35 && imc <= 39.99) {
+                  etiquetaTipoResultado.setText(String.format("Você esta na obesidade 2(SEVERA)!"));
+              }else{
+                  etiquetaTipoResultado.setText(String.format("Você esta na obesidade 3(MORBIDA)!"));
+              }
+
             }catch(NumberFormatException ex){
                 etiquetaResultado.setText(String.format("Selecione um número válido!"));
+                etiquetaTipoResultado.setText(String.format(""));
             }
     	});
 
     	//Layout Vertical
-    	VBox layout = new VBox(10, etiquetaPeso,campoPeso,etiquetaAltura,campoAltura,botaoCalc,etiquetaResultado);
+    	VBox layout = new VBox(10, etiquetaPeso,campoPeso,etiquetaAltura,campoAltura,botaoCalc,etiquetaResultado, etiquetaTipoResultado);
     	layout.setPadding(new Insets(10));
     	layout.setAlignment(Pos.CENTER);
 
