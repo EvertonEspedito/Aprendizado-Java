@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Meta tags para definir a codificação de caracteres e viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título da página -->
+    <title>Cliente Web Externo</title>
+</head>
+<body>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            margin-bottom: 10px;
+        }
+        input {
+            margin-bottom: 10px;
+        }
+        button {
+            margin-right: 10px;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        #produtosTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #produtosTable th, #produtosTable td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        #produtosTable th {
+            background-color: #f2f2f2;
+        }
+
+    </style>
+
+    <h1>CRUD - Cliente HTML/JavaScript</h1> <!-- Cabeçalho principal da página -->
+
+    <!-- Formulário de Entrada de Dados -->
+    <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="text" id="id"> <!-- Campo de entrada para o ID do produto -->
+    </div>
+    <div>
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome"> <!-- Campo de entrada para o nome do produto -->
+    </div>
+    <div>
+        <label for="preco">Preço:</label>
+        <input type="text" id="preco"> <!-- Campo de entrada para o preço do produto -->
+    </div>
+    <div>
+        <label for="quantidade">Quantidade:</label>
+        <input type="text" id="quantidade"> <!-- Campo de entrada para a quantidade do produto -->
+    </div>
+    <div>
+        <label for="status">Status:</label>
+        <input type="text" id="status"> <!-- Campo de entrada para o status do produto -->
+    </div>
+
+    <!-- Botões para salvar, atualizar, deletar e consultar -->
+    <button onclick="salvar()" style="background-color: green; color: white;">Salvar</button>
+    <button onclick="atualizar()" style="background-color: blue; color: white;">Atualizar</button>
+    <button onclick="deletar()" style="background-color: red; color: white;">Deletar</button>    
+    <button onclick="carregarCampos()" style="background-color: gray; color: white;">Consultar</button>
+    <button onclick="limparCampos()" style="background-color: black; color: white;">Limpar Campos</button>
+
+    <h2>Lista de Produtos</h2>
+    <!-- Lista para exibir os produtos -->
+    <table id="produtosTable" border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Linhas de produtos serão inseridas aqui dinamicamente -->
+        </tbody>
+    </table>
+
+    <!-- Mensagem de Erro -->
+    <div id="errorMessage" style="color: red; display: none;">
+        Ocorreu um erro ao carregar a lista de produtos.
+    </div>
+
+    <!-- Total de Produtos -->
+    <div id="totalProdutos" style="margin-top: 20px;">
+        Total de Produtos: <span id="productCount">0</span>
+    </div>
+
+    <!-- Scripts para Manipulação de Dados e DOM -->
+    <script>
+        const BASE_URL = 'http://localhost:8080/produtos'; // URL base da API
+
+        // Função para Coletar Dados do Formulário
+        function getProdutoFromForm() {
+            const nome = document.getElementById('nome').value;
+            const preco = document.getElementById('preco').value;
+            const quantidade = document.getElementById('quantidade').value;
+            const status = document.getElementById('status').value;
+            return { nome, preco: parseFloat(preco), quantidade: parseInt(quantidade), status  };
+        }
+
+        async function listarTodos() {
+            //Faz uma requisição para endpoint da API
+            fetch('http://localhost:8080/produtos')// URL da API
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na requisição: ' + response.status);
+                    }
+                    return response.json();// Converte a resposta para JSON
+                })
+                .then(data => {
+                    const produtosTableBody = document.getElementById('produtosTable').getElementsByTagName('tbody')[0];
+                    produtosTableBody.innerHTML = ''; // Limpa o corpo da tabela
+                    
+                    data.forEach(produto => {
+                        const row = produtosTableBody.insertRow();
+                        row.insertCell(0).innerText = produto.id;
+                        row.insertCell(1).innerText = produto.nome;
+                        row.insertCell(2).innerText = produto.quantidade;
+                        row.insertCell(3).innerText = produto.preco.toFixed(2);
+                        row.insertCell(4).innerText = produto.status;
+                
+                    });
+
+                    // Atualiza o total de produtos
+                    document.getElementById('productCount').innerText = data.length;
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar produtos:', error);
+                    document.getElementById('errorMessage').style.display = 'block';
+                });
+        }
+
+        async function salvar() {
+            const produto = getProdutoFromForm();
+            await fetch(BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(produto)
+            });
+            listarTodos();
+        }
+
+        async function atualizar() {
+            const produto = getProdutoFromForm();
+            const id = document.getElementById('id').value;
+            await fetch(`${BASE_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(produto)
+            });
+            listarTodos();
+        }
+
+        async function deletar() {
+            const id = document.getElementById('id').value;
+            await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
+            listarTodos();
+        }
+
+        function carregarCampos() {
+            const id = document.getElementById('id').value;
+            fetch(`${BASE_URL}/${id}`)
+                .then(response => response.json())
+                .then(produto => {
+                    document.getElementById('nome').value = produto.nome;
+                    document.getElementById('preco').value = produto.preco;
+                    document.getElementById('quantidade').value = produto.quantidade;
+                    document.getElementById('status').value = produto.status;
+                })
+                .catch(error => {
+                    console.error('Erro ao consultar produto:', error);
+                });
+        }
+
+        function limparCampos() {
+            document.getElementById('id').value = '';
+            document.getElementById('nome').value = '';
+            document.getElementById('preco').value = '';
+            document.getElementById('quantidade').value = '';
+            document.getElementById('status').value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', listarTodos);
+    </script>
+</body>
+</html>
